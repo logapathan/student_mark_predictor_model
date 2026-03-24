@@ -1,5 +1,7 @@
 import os
 import sys
+
+from sklearn.metrics import r2_score
 import dill
 import numpy as np
 import src.exceptions as CustomException
@@ -15,4 +17,22 @@ def save_object(file_path: str, obj: object) -> None:
 
     except Exception as e:
         logging.error(f"Error occurred while saving object: {e}")
+        raise CustomException(e, sys)
+    
+def evaluate_models(x_train, y_train, x_test, y_test, models: dict) -> dict:
+    try:
+        report = {}
+        for i in range(len(models)):
+            model = list(models.values())[i]
+            model.fit(x_train, y_train)
+
+            y_test_pred = model.predict(x_test)
+            test_model_score = r2_score(y_test, y_test_pred)
+
+            report[list(models.keys())[i]] = test_model_score
+
+        return report
+
+    except Exception as e:
+        logging.error(f"Error occurred while evaluating models: {e}")
         raise CustomException(e, sys)
